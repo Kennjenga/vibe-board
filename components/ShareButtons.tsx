@@ -1,5 +1,3 @@
-"use client";
-
 import { useState, useRef, useEffect } from 'react';
 
 interface ShareButtonsProps {
@@ -61,24 +59,16 @@ export function ShareButtons({ url, title, text }: ShareButtonsProps) {
         className="cyber-share-button relative"
         title="Share"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <circle cx="18" cy="5" r="3"></circle>
-          <circle cx="6" cy="12" r="3"></circle>
-          <circle cx="18" cy="19" r="3"></circle>
-          <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
-          <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
-        </svg>
-
+        ⎋
         {showTooltip && (
-          <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-black/80 text-white text-xs px-2 py-1 rounded whitespace-nowrap backdrop-blur-sm">
+          <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded whitespace-nowrap">
             Link copied!
           </span>
         )}
       </button>
-
-      {isMenuOpen && (
-        <div className="absolute top-full right-0 mt-2 backdrop-blur-md bg-white/90 border border-[#7928CA]/30 rounded-lg shadow-lg p-2 z-[60]">
-          <div className="flex items-center gap-2">
+        {isMenuOpen && (
+        <div className="absolute top-full right-0 mt-1 backdrop-blur-md bg-white/90 border border-[#7928CA]/30 rounded-lg shadow-lg p-1 z-[60]">
+          <div className="flex items-center gap-1">
             {typeof navigator.share === 'function' && (
               <button
                 onClick={() => {
@@ -88,11 +78,7 @@ export function ShareButtons({ url, title, text }: ShareButtonsProps) {
                 className="cyber-share-menu-icon"
                 title="Share via Device"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
-                  <polyline points="16 6 12 2 8 6"></polyline>
-                  <line x1="12" y1="2" x2="12" y2="15"></line>
-                </svg>
+                📱
               </button>
             )}
             <button
@@ -113,9 +99,7 @@ export function ShareButtons({ url, title, text }: ShareButtonsProps) {
               className="cyber-share-menu-icon"
               title="Share on Facebook"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path>
-              </svg>
+              f
             </button>
             <button
               onClick={() => {
@@ -125,11 +109,7 @@ export function ShareButtons({ url, title, text }: ShareButtonsProps) {
               className="cyber-share-menu-icon"
               title="Share on LinkedIn"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path>
-                <rect x="2" y="9" width="4" height="12"></rect>
-                <circle cx="4" cy="4" r="2"></circle>
-              </svg>
+              in
             </button>
             <button
               onClick={() => {
@@ -141,10 +121,7 @@ export function ShareButtons({ url, title, text }: ShareButtonsProps) {
               className="cyber-share-menu-icon"
               title="Copy Link"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
-                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
-              </svg>
+              📋
             </button>
           </div>
         </div>

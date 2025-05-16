@@ -3,7 +3,7 @@
 import { useAccount } from 'wagmi';
 import { useState } from 'react';
 import Image from 'next/image';
-import { ConnectButton } from '@rainbow-me/rainbowkit';
+import { motion } from 'framer-motion';
 import {
   useCreateVibe,
   useGetLatestVibes,
@@ -67,107 +67,171 @@ export default function Home() {
   const vibes = view === 'latest' ? latestVibes : popularVibes;
 
   return (
-    <main className="min-h-screen p-4 md:p-8 bg-gradient-to-br from-cyan-50 to-purple-50">
-      <div className="max-w-7xl mx-auto">
+    <main className="min-h-screen p-8 bg-white">
+      <div className="cyber-grid"></div>
+
+      {/* Horizontal lines */}
+      {Array.from({ length: 5 }).map((_, i) => (
+        <div
+          key={`line-h-${i}`}
+          className="cyber-line"
+          style={{
+            top: `${20 + i * 15}%`,
+          }}
+        />
+      ))}
+
+      <div className="max-w-7xl mx-auto relative z-10">
+        <motion.h1
+          className="text-4xl font-bold mb-8 text-center cyber-text"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+        >
+          Explore Vibes
+        </motion.h1>
+
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Left Column - Vibes Feed (70%) */}
-          <div className="lg:w-8/12 order-2 lg:order-1">
-            <div className="flex gap-4 mb-6 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-purple-200">
-              <button
+          <motion.div
+            className="lg:w-8/12"
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+          >
+            <div className="flex gap-4 mb-6 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-blue-200">
+              <motion.button
                 onClick={() => setView('latest')}
                 className={`cyber-tab ${view === 'latest' ? 'cyber-tab-active' : ''}`}
+                whileHover={{ y: -2 }}
+                whileTap={{ y: 0 }}
               >
                 Latest Vibes
-              </button>
-              <button
+              </motion.button>
+              <motion.button
                 onClick={() => setView('popular')}
                 className={`cyber-tab ${view === 'popular' ? 'cyber-tab-active' : ''}`}
+                whileHover={{ y: -2 }}
+                whileTap={{ y: 0 }}
               >
                 Popular Vibes
-              </button>
+              </motion.button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {isLoading ? (
                 Array.from({ length: 6 }).map((_, i) => (
-                  <div key={i} className="vibe-card animate-pulse">
-                    <div className="space-y-4">
-                      <div className="flex items-start gap-3">
-                        <div className="h-12 w-12 bg-gray-200/50 rounded-xl"></div>
-                        <div className="flex-1">
-                          <div className="h-6 bg-gray-200/50 rounded w-3/4"></div>
-                          <div className="h-4 bg-gray-200/50 rounded w-1/2 mt-2"></div>
-                        </div>
-                      </div>
-                      <div className="aspect-video w-full bg-gray-200/50 rounded-lg"></div>
-                      <div className="flex justify-between items-center pt-4 border-t border-gray-200/30">
-                        <div className="h-8 w-20 bg-gray-200/50 rounded"></div>
-                        <div className="h-4 w-32 bg-gray-200/50 rounded"></div>
-                      </div>
-                    </div>
-                  </div>
+                  <motion.div
+                    key={i}
+                    className="vibe-card animate-pulse"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.4, delay: 0.1 * i }}
+                  >
+                    <div className="h-48 bg-gray-100 rounded-lg"></div>
+                    <div className="h-6 bg-gray-100 rounded mt-4 w-3/4"></div>
+                    <div className="h-4 bg-gray-100 rounded mt-2 w-1/2"></div>
+                  </motion.div>
                 ))
               ) : vibes?.length === 0 ? (
-                <div className="col-span-full text-center py-12">
+                <motion.div
+                  className="col-span-full text-center py-12"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.6 }}
+                >
                   <p className="text-xl text-gray-500">No vibes yet. Be the first to share your vibe!</p>
-                </div>
+                </motion.div>
               ) : (
-                vibes?.map((tokenId) => (
-                  <VibeCard key={tokenId.toString()} tokenId={tokenId} />
+                vibes?.map((tokenId, index) => (
+                  <motion.div
+                    key={tokenId.toString()}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.4, delay: 0.1 * index }}
+                  >
+                    <VibeCard tokenId={tokenId} />
+                  </motion.div>
                 ))
               )}
             </div>
-          </div>
+          </motion.div>
 
           {/* Right Column - Create Vibe & Streak (30%) */}
-          <div className="lg:w-4/12 order-1 lg:order-2">
+          <motion.div
+            className="lg:w-4/12"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6, delay: 0.3 }}
+          >
             {address && (
-              <div className="cyber-panel mb-6">
+              <motion.div
+                className="cyber-panel mb-6"
+                whileHover={{
+                  boxShadow: "0 15px 30px rgba(0, 0, 0, 0.1), 0 0 15px rgba(0, 229, 255, 0.2)",
+                  y: -5
+                }}
+              >
                 <div className="flex items-center gap-3">
-                  <div className="cyber-badge">
+                  <motion.div
+                    className="cyber-badge"
+                    whileHover={{ scale: 1.1, rotate: 5 }}
+                  >
                     <span className="text-lg font-bold">{userStreak?.toString() || '0'}</span>
-                  </div>
+                  </motion.div>
                   <div>
-                    <h3 className="text-lg font-bold text-purple-800">Your Vibe Streak</h3>
+                    <h3 className="text-lg font-bold" style={{ color: "var(--neon-blue)" }}>Your Vibe Streak</h3>
                     <p className="text-sm text-gray-600">Keep sharing daily!</p>
                   </div>
                 </div>
-              </div>
+              </motion.div>
             )}
 
-            {address ? (
-              <div className="cyber-panel mb-6">
-                <h2 className="text-xl font-bold mb-4 text-pink-600">Share Your Vibe</h2>
+            {address && (
+              <motion.div
+                className="cyber-panel mb-6"
+                whileHover={{
+                  boxShadow: "0 15px 30px rgba(0, 0, 0, 0.1), 0 0 15px rgba(255, 45, 189, 0.2)",
+                  y: -5
+                }}
+              >
+                <h2 className="text-xl font-bold mb-4" style={{ color: "var(--neon-pink)" }}>Share Your Vibe</h2>
                 <div className="space-y-4">
-                  <input
-                    type="text"
-                    placeholder="Enter your vibe phrase..."
-                    className={`w-full p-3 bg-white/80 backdrop-blur-sm border rounded-lg transition-colors ${
-                      error ? 'border-red-500' : 'border-purple-300 focus:border-pink-500'
-                    }`}
-                    value={newVibe.phrase}
-                    onChange={(e) => {
-                      setError('');
-                      setNewVibe({ ...newVibe, phrase: e.target.value });
-                    }}
-                  />
+                  <motion.div whileHover={{ scale: 1.02 }}>
+                    <input
+                      type="text"
+                      placeholder="Enter your vibe phrase..."
+                      className={`w-full p-3 bg-white border rounded-lg transition-colors ${
+                        error ? 'border-red-500' : 'border-blue-300 focus:border-blue-500'
+                      }`}
+                      value={newVibe.phrase}
+                      onChange={(e) => {
+                        setError('');
+                        setNewVibe({ ...newVibe, phrase: e.target.value });
+                      }}
+                    />
+                  </motion.div>
                   {error && <p className="text-red-500 text-sm">{error}</p>}
 
-                  <div className="flex flex-wrap gap-4">
-                    <EmojiPicker
-                      selectedEmoji={newVibe.emoji}
-                      onEmojiSelect={(emoji) => setNewVibe({ ...newVibe, emoji })}
-                    />
+                  <div className="flex gap-4">
+                    <motion.div whileHover={{ scale: 1.05 }}>
+                      <EmojiPicker
+                        selectedEmoji={newVibe.emoji}
+                        onEmojiSelect={(emoji) => setNewVibe({ ...newVibe, emoji })}
+                      />
+                    </motion.div>
                     <div className="flex gap-2 flex-wrap">
                       {SAMPLE_COLORS.map((color) => (
-                        <button
+                        <motion.button
                           key={color}
                           onClick={() => setNewVibe({ ...newVibe, color })}
-                          className={`w-8 h-8 rounded-full transition-transform hover:scale-110 ${
-                            newVibe.color === color ? 'ring-2 ring-white ring-offset-2 ring-offset-pink-500' : ''
+                          className={`w-8 h-8 rounded-full ${
+                            newVibe.color === color ? 'ring-2 ring-white ring-offset-2 ring-offset-blue-500' : ''
                           }`}
                           style={{ backgroundColor: color }}
                           title={color}
+                          whileHover={{ scale: 1.2 }}
+                          whileTap={{ scale: 0.9 }}
                         />
                       ))}
                     </div>
@@ -176,7 +240,10 @@ export default function Home() {
                   {/* Image Upload */}
                   <div className="flex gap-4 items-start">
                     <div className="flex-shrink-0">
-                      <div className="relative w-14 h-14 rounded-lg overflow-hidden bg-gray-100 border-2 border-[#7928CA]/20">
+                      <motion.div
+                        className="relative w-12 h-12 rounded-lg overflow-hidden bg-gray-100 border-2 border-blue-300"
+                        whileHover={{ borderColor: "var(--neon-blue)" }}
+                      >
                         {newVibe.imageURI ? (
                           <>
                             <Image
@@ -185,20 +252,22 @@ export default function Home() {
                               fill
                               className="object-cover"
                             />
-                            <button
+                            <motion.button
                               onClick={() => setNewVibe({ ...newVibe, imageURI: '' })}
                               className="absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center text-white"
+                              whileHover={{ scale: 1.1 }}
                             >
                               ✕
-                            </button>
+                            </motion.button>
                           </>
                         ) : (
-                          <label
+                          <motion.label
                             htmlFor="image-upload"
-                            className="absolute inset-0 flex items-center justify-center cursor-pointer hover:bg-[#7928CA]/10 transition-colors text-2xl text-gray-400"
+                            className="absolute inset-0 flex items-center justify-center cursor-pointer hover:bg-blue-100 transition-colors"
+                            whileHover={{ scale: 1.1 }}
                           >
                             +
-                          </label>
+                          </motion.label>
                         )}
                         <input
                           type="file"
@@ -235,54 +304,70 @@ export default function Home() {
                             }
                           }}
                         />
-                      </div>
+                      </motion.div>
                     </div>
 
                     <div className="flex-grow">
-                      <input
-                        type="url"
-                        placeholder="Or paste image URL..."
-                        className={`w-full p-3 bg-white/80 backdrop-blur-sm border rounded-lg transition-colors text-sm ${
-                          error && error.includes('image') ? 'border-red-500' : 'border-purple-300 focus:border-pink-500'
-                        }`}
-                        value={newVibe.imageURI}
-                        onChange={(e) => {
-                          setError('');
-                          setNewVibe({ ...newVibe, imageURI: e.target.value });
-                        }}
-                      />
+                      <motion.div whileHover={{ scale: 1.02 }}>
+                        <input
+                          type="url"
+                          placeholder="Or paste image URL..."
+                          className={`w-full p-3 bg-white border rounded-lg transition-colors text-sm ${
+                            error && error.includes('image') ? 'border-red-500' : 'border-blue-300 focus:border-blue-500'
+                          }`}
+                          value={newVibe.imageURI}
+                          onChange={(e) => {
+                            setError('');
+                            setNewVibe({ ...newVibe, imageURI: e.target.value });
+                          }}
+                        />
+                      </motion.div>
                       <p className="mt-1 text-xs text-gray-500">
                         Upload image (max 5MB) or provide URL
                       </p>
                     </div>
                   </div>
 
-                  <button
+                  <motion.button
                     onClick={handleCreateVibe}
                     disabled={isCreating}
                     className={`cyber-button-primary w-full ${isCreating ? 'opacity-50 cursor-wait' : ''}`}
+                    whileHover={{ scale: 1.02, boxShadow: "0 10px 20px rgba(0, 229, 255, 0.2)" }}
+                    whileTap={{ scale: 0.98 }}
                   >
                     {isCreating ? 'Creating...' : 'Share Vibe'}
-                  </button>
+                  </motion.button>
                 </div>
-              </div>
-            ) : (
-              <div className="cyber-panel mb-6 text-center">
-                <h2 className="text-xl font-bold mb-4 text-pink-600">Connect to Share</h2>
-                <p className="text-gray-600 mb-4">Connect your wallet to start sharing your vibes and collecting streaks!</p>
-                <ConnectButton label="Connect Wallet" />
-              </div>
+              </motion.div>
             )}
 
-            <div className="cyber-panel">
-              <h2 className="text-xl font-bold mb-4 text-cyan-600">Trending Tags</h2>
+            <motion.div
+              className="cyber-panel"
+              whileHover={{
+                boxShadow: "0 15px 30px rgba(0, 0, 0, 0.1), 0 0 15px rgba(0, 229, 255, 0.2)",
+                y: -5
+              }}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.4 }}
+            >
+              <h2 className="text-xl font-bold mb-4" style={{ color: "var(--neon-blue)" }}>Trending Tags</h2>
               <div className="flex flex-wrap gap-2">
-                {['#cyberpunk', '#neon', '#future', '#tech', '#digital', '#vibe', '#mood'].map(tag => (
-                  <span key={tag} className="cyber-tag">{tag}</span>
+                {['#cyberpunk', '#neon', '#future', '#tech', '#digital', '#vibe', '#mood'].map((tag, i) => (
+                  <motion.span
+                    key={tag}
+                    className="cyber-tag"
+                    whileHover={{ y: -3, boxShadow: "0 5px 10px rgba(0, 229, 255, 0.2)" }}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3, delay: 0.5 + (i * 0.05) }}
+                  >
+                    {tag}
+                  </motion.span>
                 ))}
               </div>
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
         </div>
       </div>
     </main>
@@ -295,16 +380,25 @@ function VibeCard({ tokenId }: { tokenId: bigint }) {
   const { data: hasLiked } = useHasLiked(tokenId, address || '0x0');
   const { likeVibe } = useLikeVibe(tokenId);
   const [isLiking, setIsLiking] = useState(false);
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    setMousePosition({
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top
+    });
+  };
 
   if (isLoading) {
     return (
-      <div className="vibe-card animate-pulse backdrop-blur-sm bg-white/30 border-2 border-[#7928CA]/20 rounded-xl p-6">
+      <div className="vibe-card animate-pulse">
         <div className="space-y-4">
-          <div className="h-6 bg-gray-200/50 rounded w-3/4"></div>
-          <div className="aspect-video w-full bg-gray-200/50 rounded-lg"></div>
+          <div className="h-6 bg-gray-100 rounded w-3/4"></div>
+          <div className="aspect-video w-full bg-gray-100 rounded-lg"></div>
           <div className="flex justify-between items-center">
-            <div className="h-8 w-20 bg-gray-200/50 rounded"></div>
-            <div className="h-4 w-32 bg-gray-200/50 rounded"></div>
+            <div className="h-8 w-20 bg-gray-100 rounded"></div>
+            <div className="h-4 w-32 bg-gray-100 rounded"></div>
           </div>
         </div>
       </div>
@@ -326,12 +420,34 @@ function VibeCard({ tokenId }: { tokenId: bigint }) {
   };
 
   return (
-    <div className="vibe-card group backdrop-blur-sm bg-white/30 border-2 border-[#7928CA]/20 rounded-xl p-6 transition-all hover:border-[#7928CA]/40 hover:shadow-[0_0_15px_rgba(121,40,202,0.2)]">
+    <motion.div
+      className="vibe-card group"
+      onMouseMove={handleMouseMove}
+      style={{
+        '--mouse-x': `${mousePosition.x}px`,
+        '--mouse-y': `${mousePosition.y}px`
+      } as React.CSSProperties}
+      whileHover={{ y: -5 }}
+    >
       <div className="flex items-start gap-3 mb-4">
-        <p className="text-xl font-bold flex-grow" style={{ color: vibe.color }}>
-          {vibe.phrase}
-        </p>
-        <span className="text-2xl transition-transform group-hover:scale-110 flex-shrink-0">{vibe.emoji}</span>
+        <motion.div
+          className="w-12 h-12 flex items-center justify-center rounded-xl text-2xl flex-shrink-0"
+          style={{
+            backgroundColor: `${vibe.color}15`,
+            border: `2px solid ${vibe.color}30`
+          }}
+          whileHover={{ scale: 1.1, rotate: 5 }}
+        >
+          {vibe.emoji}
+        </motion.div>
+        <div className="flex-1 min-w-0">
+          <p className="text-xl font-bold truncate" style={{ color: vibe.color }}>
+            {vibe.phrase}
+          </p>
+          <p className="text-sm text-gray-600 mt-1">
+            by {vibe.creator.slice(0, 6)}...{vibe.creator.slice(-4)}
+          </p>
+        </div>
       </div>
 
       <div className="aspect-video w-full rounded-lg mb-4 overflow-hidden">
@@ -366,33 +482,34 @@ function VibeCard({ tokenId }: { tokenId: bigint }) {
 
       <div className="flex justify-between items-center">
         <div className="flex gap-2 items-center">
-          <button
+          <motion.button
             onClick={handleLike}
             className={`cyber-like-button relative overflow-hidden
               ${hasLiked ? 'cyber-liked' : ''}
               ${isLiking ? 'cursor-wait opacity-70' : ''}
               px-4 py-2 text-sm font-medium rounded-md
-              border border-[#7928CA]/30 hover:border-[#7928CA]
-              bg-gradient-to-r from-[#7928CA]/10 to-[#FF0080]/10
-              hover:from-[#7928CA]/20 hover:to-[#FF0080]/20
-              transition-all duration-300
             `}
             disabled={hasLiked || isLiking}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
           >
             <span className="relative z-10">
               {hasLiked ? '❤️' : isLiking ? '...' : '♡'} {vibe.likes.toString()}
             </span>
-          </button>
+          </motion.button>
           <ShareButtons
-            url={`https://vibe-board.com/vibe/${tokenId.toString()}`} // This should be configurable via environment variable
+            url={`https://vibe-board.com/vibe/${tokenId.toString()}`}
             title={`Check out this vibe by ${vibe.creator.slice(0, 6)}...${vibe.creator.slice(-4)}`}
             text={`${vibe.emoji} ${vibe.phrase} ${vibe.emoji}`}
           />
         </div>
-        <span className="text-sm text-gray-600 font-medium">
-          by {vibe.creator.slice(0, 6)}...{vibe.creator.slice(-4)}
-        </span>
+        <motion.div
+          className="text-xs px-2 py-1 rounded-full bg-gray-100 text-gray-600"
+          whileHover={{ scale: 1.05, backgroundColor: "#f0f9ff" }}
+        >
+          {new Date(Number(vibe.timestamp) * 1000).toLocaleDateString()}
+        </motion.div>
       </div>
-    </div>
+    </motion.div>
   );
 }

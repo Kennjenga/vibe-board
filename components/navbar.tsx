@@ -3,38 +3,41 @@
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { motion } from 'framer-motion';
 
 export default function Navbar() {
   const pathname = usePathname();
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-black/30 backdrop-blur-lg border-b border-[var(--neon-blue)] shadow-lg">
-      <div className="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
-        <div className="flex items-center gap-4">
+    <nav className="cyber-navbar">
+      <div className="px-6 py-3 flex justify-between items-center">
+        <div className="flex items-center gap-6">
           <Link href="/" className="flex items-center gap-3">
-            <div className="cyber-logo">V</div>
-            <h1 className="text-2xl font-bold glow-text hidden sm:block" style={{ color: 'var(--neon-blue)' }}>
+            <motion.div
+              className="cyber-logo"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              V
+            </motion.div>
+            <h1 className="text-2xl font-bold cyber-text hidden sm:block">
               VIBE BOARD
             </h1>
           </Link>
 
-          <div className="hidden md:flex items-center gap-4 ml-8">
+          <div className="hidden md:flex items-center gap-4">
             <Link
               href="/vibes"
-              className={`px-3 py-2 rounded-lg transition-all ${
-                pathname === '/vibes'
-                  ? 'bg-[var(--neon-blue)]/10 text-[var(--neon-blue)] font-medium'
-                  : 'hover:bg-white/10'
+              className={`cyber-navbar-link ${
+                pathname === '/vibes' ? 'cyber-navbar-link-active' : ''
               }`}
             >
               Explore
             </Link>
             <Link
               href="/about"
-              className={`px-3 py-2 rounded-lg transition-all ${
-                pathname === '/about'
-                  ? 'bg-[var(--neon-blue)]/10 text-[var(--neon-blue)] font-medium'
-                  : 'hover:bg-white/10'
+              className={`cyber-navbar-link ${
+                pathname === '/about' ? 'cyber-navbar-link-active' : ''
               }`}
             >
               About
@@ -43,7 +46,7 @@ export default function Navbar() {
         </div>
 
         <ConnectButton
-          label="Log in"
+          label="Connect"
           accountStatus="address"
           chainStatus="icon"
         />
