@@ -1,13 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import { useAccount } from 'wagmi';
-import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { motion, useScroll, useTransform } from 'framer-motion';
 
 export default function LandingPage() {
-  const { isConnected } = useAccount();
+  const { } = useAccount();
   const [isHovering, setIsHovering] = useState(false);
 
   // Setup scroll animations
@@ -66,7 +65,6 @@ export default function LandingPage() {
   const HeroSection = () => {
     // Parallax effect for hero elements
     const titleY = useTransform(scrollY, [0, 300], [0, -50]);
-    const imageY = useTransform(scrollY, [0, 300], [0, 30]);
     const statsOpacity = useTransform(scrollY, [0, 200], [0, 1]);
 
     return (
@@ -147,7 +145,8 @@ export default function LandingPage() {
     );
   };
 
-  // Vibe preview component
+  // Vibe preview component - commented out as it's not being used
+  /*
   const VibePreview = () => {
     const vibeData = [
       { emoji: '😎', phrase: "Feeling unstoppable today!", color: "var(--neon-pink)", likes: 42 },
@@ -188,6 +187,7 @@ export default function LandingPage() {
       </div>
     );
   };
+  */
 
   // Features section component with horizontal timeline
   const FeaturesSection = () => {
@@ -415,7 +415,7 @@ export default function LandingPage() {
 
                 <h3 className="text-2xl font-bold mb-4">Community Connection</h3>
                 <p className="text-gray-700 mb-6 text-lg">
-                  Vibe Board is more than just a platform—it's a community of like-minded individuals
+                  Vibe Board is more than just a platform—it&apos;s a community of like-minded individuals
                   sharing their authentic selves through vibes.
                 </p>
 
@@ -501,7 +501,7 @@ export default function LandingPage() {
   );
 
   // Safe localStorage access with client-side detection
-  const isClient = typeof window !== 'undefined';
+  // const isClient = typeof window !== 'undefined'; // Commented out as it's not being used
 
   return (
     <div className="min-h-screen overflow-hidden relative bg-white">

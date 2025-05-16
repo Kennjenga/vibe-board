@@ -2,7 +2,6 @@
 
 import { motion } from 'framer-motion';
 import Link from 'next/link';
-import Image from 'next/image';
 
 export default function AboutPage() {
   // Animation variants
@@ -99,7 +98,7 @@ export default function AboutPage() {
               In a world where social media often feels curated and artificial, we wanted to build a platform that encourages authentic expression and genuine connection.
             </p>
             <p className="text-lg text-gray-700">
-              By combining the expressive nature of emojis, the permanence of blockchain, and the creativity of digital art, we've created a unique space for people to share their vibes.
+              By combining the expressive nature of emojis, the permanence of blockchain, and the creativity of digital art, we&apos;ve created a unique space for people to share their vibes.
             </p>
           </motion.section>
 
@@ -156,7 +155,7 @@ export default function AboutPage() {
               <div className="text-center">
                 <div className="cyber-badge mx-auto mb-4">🏆</div>
                 <h3 className="text-xl font-bold mb-2">Collect</h3>
-                <p className="text-gray-700">Build your streak and earn rewards for consistent vibing. Interact with others' vibes by liking and sharing.</p>
+                <p className="text-gray-700">Build your streak and earn rewards for consistent vibing. Interact with others&apos; vibes by liking and sharing.</p>
               </div>
             </div>
 
@@ -170,10 +169,10 @@ export default function AboutPage() {
           <motion.section variants={itemVariants} className="cyber-panel mb-12">
             <h2 className="text-2xl font-bold mb-4 cyber-text">Our Team</h2>
             <p className="text-lg mb-4 text-gray-700">
-              We're a small team of designers, developers, and blockchain enthusiasts who believe in the power of self-expression and community.
+              We&apos;re a small team of designers, developers, and blockchain enthusiasts who believe in the power of self-expression and community.
             </p>
             <p className="text-lg text-gray-700">
-              Our diverse backgrounds in art, technology, and social psychology have helped us create a platform that's both technically innovative and emotionally resonant.
+              Our diverse backgrounds in art, technology, and social psychology have helped us create a platform that&apos;s both technically innovative and emotionally resonant.
             </p>
           </motion.section>
 
@@ -181,7 +180,7 @@ export default function AboutPage() {
           <motion.section variants={itemVariants} className="text-center mb-12">
             <h2 className="text-2xl font-bold mb-6 cyber-text">Get In Touch</h2>
             <p className="text-lg mb-8 text-gray-700">
-              Have questions, suggestions, or just want to say hi? We'd love to hear from you!
+              Have questions, suggestions, or just want to say hi? We&apos;d love to hear from you!
             </p>
             <div className="flex gap-4 justify-center">
               <a
