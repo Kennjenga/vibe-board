@@ -22,6 +22,10 @@ export default function Home() {
   const [view, setView] = useState<VibeView>('latest');
   const [isCreating, setIsCreating] = useState(false);
   const [error, setError] = useState<string>('');
+  const [activeImageTab, setActiveImageTab] = useState<'ai' | 'upload'>('ai');
+  const [imagePrompt, setImagePrompt] = useState<string>('');
+  const [imageUrlInput, setImageUrlInput] = useState<string>('');
+  const [previewImage, setPreviewImage] = useState<{ url: string; type: 'image' | 'gif' } | null>(null);
   const [newVibe, setNewVibe] = useState<NewVibe>({
     emoji: '😊',
     color: SAMPLE_COLORS[0],
@@ -45,16 +49,38 @@ export default function Home() {
       return;
     }
 
+    // If there's a preview image but no selected image, ask user to confirm
+    if (previewImage && !newVibe.imageURI) {
+      if (window.confirm('Do you want to use the preview image for your vibe?')) {
+        // Update the vibe with the preview image
+        setNewVibe(prev => ({ ...prev, imageURI: previewImage.url }));
+      } else {
+        setError('Please select an image for your vibe');
+        return;
+      }
+    }
+
+    if (!previewImage && !newVibe.imageURI) {
+      setError('Please add an image to your vibe');
+      return;
+    }
+
     setError('');
     setIsCreating(true);
     try {
+      // Call createVibe function to create the vibe
       await createVibe();
+
+      // Reset form
       setNewVibe({
         emoji: '😊',
         color: SAMPLE_COLORS[0],
         phrase: '',
         imageURI: ''
       });
+      setPreviewImage(null);
+      setImagePrompt('');
+      setImageUrlInput('');
     } catch (error) {
       console.error('Error creating vibe:', error);
       setError('Failed to create vibe. Please try again.');
@@ -173,93 +199,393 @@ export default function Home() {
                     </div>
                   </div>
 
-                  {/* Image Upload */}
-                  <div className="flex gap-4 items-start">
-                    <div className="flex-shrink-0">
-                      <div className="relative w-14 h-14 rounded-lg overflow-hidden bg-gray-100 border-2 border-[#7928CA]/20">
-                        {newVibe.imageURI ? (
-                          <>
-                            <Image
-                              src={newVibe.imageURI}
-                              alt="Selected"
-                              fill
-                              className="object-cover"
-                            />
+                  {/* Image Section */}
+                  <div className="space-y-4">
+                    {/* Image Preview */}
+                    <div className={`relative aspect-video w-full rounded-lg overflow-hidden border-2 transition-all duration-300 ${
+                      previewImage?.url || newVibe.imageURI
+                        ? 'bg-gray-100 border-[#7928CA]/40 shadow-lg'
+                        : 'bg-gray-50 border-dashed border-gray-300 hover:border-[#7928CA]/30'
+                    }`}>
+                      {previewImage?.url ? (
+                        <>
+                          <Image
+                            src={previewImage.url}
+                            alt={`Preview ${previewImage.type}`}
+                            fill
+                            className="object-cover"
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 hover:opacity-100 transition-opacity">
                             <button
-                              onClick={() => setNewVibe({ ...newVibe, imageURI: '' })}
-                              className="absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center text-white"
+                              onClick={() => setPreviewImage(null)}
+                              className="absolute top-2 right-2 bg-black/60 text-white rounded-full w-8 h-8 flex items-center justify-center hover:bg-black/80 transition-colors"
+                              title="Remove image"
                             >
                               ✕
                             </button>
-                          </>
-                        ) : (
-                          <label
-                            htmlFor="image-upload"
-                            className="absolute inset-0 flex items-center justify-center cursor-pointer hover:bg-[#7928CA]/10 transition-colors text-2xl text-gray-400"
+                            {/* Use image button */}
+                            <button
+                              onClick={() => {
+                                setNewVibe({ ...newVibe, imageURI: previewImage.url });
+                                setPreviewImage(null);
+                              }}
+                              className="absolute bottom-2 right-2 bg-[#7928CA]/80 text-white py-1 px-3 rounded-full text-sm font-medium hover:bg-[#7928CA] transition-colors"
+                            >
+                              Use this image
+                            </button>
+                          </div>
+                        </>
+                      ) : newVibe.imageURI ? (
+                        <>
+                          <Image
+                            src={newVibe.imageURI}
+                            alt="Selected Vibe Image"
+                            fill
+                            className="object-cover"
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 hover:opacity-100 transition-opacity">
+                            <button
+                              onClick={() => setNewVibe({ ...newVibe, imageURI: '' })}
+                              className="absolute top-2 right-2 bg-black/60 text-white rounded-full w-8 h-8 flex items-center justify-center hover:bg-black/80 transition-colors"
+                              title="Remove image"
+                            >
+                              ✕
+                            </button>
+                          </div>
+                        </>
+                      ) : (
+                        <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center">
+                          <div className="w-16 h-16 mb-3 rounded-full bg-[#7928CA]/10 flex items-center justify-center">
+                            <span className="text-2xl">{newVibe.emoji || '🖼️'}</span>
+                          </div>
+                          <p className="text-gray-500 mb-1">Add an image to your vibe</p>
+                          <p className="text-xs text-gray-400">Generate with AI or upload your own</p>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Tabs for Image Options */}
+                    <div className="border-b border-gray-200">
+                      <ul className="flex -mb-px">
+                        <li className="mr-1 flex-1">
+                          <button
+                            onClick={() => {
+                              setActiveImageTab('ai');
+                              setError('');
+                            }}
+                            className={`inline-block w-full py-2 px-1 text-center border-b-2 transition-colors ${
+                              activeImageTab === 'ai'
+                                ? 'border-[#7928CA] text-[#7928CA] font-medium'
+                                : 'border-transparent hover:border-gray-300 text-gray-500 hover:text-gray-700'
+                            }`}
                           >
-                            +
-                          </label>
-                        )}
-                        <input
-                          type="file"
-                          accept="image/*"
-                          id="image-upload"
-                          className="hidden"
-                          onChange={async (e) => {
-                            const file = e.target.files?.[0];
-                            if (file) {
-                              if (file.size > 5 * 1024 * 1024) {
-                                setError('Image must be less than 5MB');
-                                return;
-                              }
+                            AI Generation
+                          </button>
+                        </li>
+                        <li className="flex-1">
+                          <button
+                            onClick={() => {
+                              setActiveImageTab('upload');
+                              setError('');
+                            }}
+                            className={`inline-block w-full py-2 px-1 text-center border-b-2 transition-colors ${
+                              activeImageTab === 'upload'
+                                ? 'border-[#7928CA] text-[#7928CA] font-medium'
+                                : 'border-transparent hover:border-gray-300 text-gray-500 hover:text-gray-700'
+                            }`}
+                          >
+                            Upload
+                          </button>
+                        </li>
+                      </ul>
+                    </div>
 
-                              const formData = new FormData();
-                              formData.append('file', file);
-                              formData.append('upload_preset', 'vibeboard');
+                    {/* Content based on active tab */}
+                    <div className="space-y-3">
+                      {/* AI Image Generation Tab */}
+                      {activeImageTab === 'ai' && (
+                        <div className="flex flex-col gap-3">
+                          {/* Custom Prompt Input */}
+                          <div>
+                            <label htmlFor="image-prompt" className="block text-sm font-medium text-gray-700 mb-1">
+                              Image Generation Prompt
+                            </label>
+                            <textarea
+                              id="image-prompt"
+                              rows={2}
+                              placeholder="Describe the image you want to generate..."
+                              className="cyber-input w-full p-3 text-sm"
+                              value={imagePrompt}
+                              onChange={(e) => setImagePrompt(e.target.value)}
+                            />
+                            <div className="flex justify-between mt-1">
+                              <p className="text-xs text-gray-500">
+                                Be descriptive for better results
+                              </p>
+                              <button
+                                className="text-xs text-purple-600 hover:text-purple-800"
+                                onClick={() => setImagePrompt(`A vibrant, artistic image that represents the feeling: "${newVibe.phrase}" with ${newVibe.emoji} emoji. Use ${newVibe.color} as the primary color.`)}
+                              >
+                                Use vibe details
+                              </button>
+                            </div>
+                          </div>
 
-                              try {
-                                const response = await fetch(
-                                  'https://api.cloudinary.com/v1_1/your-cloud-name/image/upload',
-                                  {
-                                    method: 'POST',
-                                    body: formData,
-                                  }
-                                );
-                                const data = await response.json();
-                                setNewVibe({ ...newVibe, imageURI: data.secure_url });
+                          <div className="flex gap-3">
+                            <button
+                              onClick={async () => {
+                                if (!imagePrompt.trim()) {
+                                  setError('Please enter an image prompt first');
+                                  return;
+                                }
+
                                 setError('');
-                              } catch (error) {
-                                console.error('Error uploading image:', error);
-                                setError('Failed to upload image. Please try again.');
-                              }
-                            }
-                          }}
-                        />
-                      </div>
+                                setIsCreating(true);
+                                setPreviewImage(null);
+
+                                try {
+                                  const response = await fetch('/api/generate-image', {
+                                    method: 'POST',
+                                    headers: {
+                                      'Content-Type': 'application/json',
+                                    },
+                                    body: JSON.stringify({
+                                      prompt: imagePrompt,
+                                      type: 'image'
+                                    }),
+                                  });
+
+                                  const data = await response.json();
+                                  if (!response.ok) {
+                                    throw new Error(data.error || 'Failed to generate image');
+                                  }
+
+                                  // Store the image URL in previewImage instead of newVibe.imageURI
+                                  setPreviewImage({
+                                    url: data.imageURI,
+                                    type: 'image'
+                                  });
+                                } catch (error) {
+                                  console.error('Error generating image:', error);
+                                  setError(error instanceof Error ? error.message : 'Failed to generate image. Please try again.');
+                                } finally {
+                                  setIsCreating(false);
+                                }
+                              }}
+                              disabled={isCreating || !imagePrompt.trim()}
+                              className={`cyber-button flex-1 ${isCreating ? 'opacity-50 cursor-wait' : ''}`}
+                            >
+                              <span className="flex items-center justify-center gap-2">
+                                <span className="text-lg">🎨</span>
+                                <span>{isCreating ? 'Generating...' : 'Generate Image'}</span>
+                              </span>
+                            </button>
+
+                            <button
+                              onClick={async () => {
+                                if (!imagePrompt.trim()) {
+                                  setError('Please enter an image prompt first');
+                                  return;
+                                }
+
+                                setError('');
+                                setIsCreating(true);
+                                setPreviewImage(null);
+
+                                try {
+                                  const response = await fetch('/api/generate-image', {
+                                    method: 'POST',
+                                    headers: {
+                                      'Content-Type': 'application/json',
+                                    },
+                                    body: JSON.stringify({
+                                      prompt: imagePrompt,
+                                      type: 'gif'
+                                    }),
+                                  });
+
+                                  const data = await response.json();
+                                  if (!response.ok) {
+                                    throw new Error(data.error || 'Failed to generate GIF');
+                                  }
+
+                                  // Store the image URL in previewImage instead of newVibe.imageURI
+                                  setPreviewImage({
+                                    url: data.imageURI,
+                                    type: 'gif'
+                                  });
+                                } catch (error) {
+                                  console.error('Error generating GIF:', error);
+                                  setError(error instanceof Error ? error.message : 'Failed to generate GIF. Please try again.');
+                                } finally {
+                                  setIsCreating(false);
+                                }
+                              }}
+                              disabled={isCreating || !imagePrompt.trim()}
+                              className={`cyber-button flex-1 ${isCreating ? 'opacity-50 cursor-wait' : ''}`}
+                            >
+                              <span className="flex items-center justify-center gap-2">
+                                <span className="text-lg">✨</span>
+                                <span>{isCreating ? 'Generating...' : 'Generate GIF'}</span>
+                              </span>
+                            </button>
+                          </div>
+
+                          <div className="p-3 bg-purple-50 border border-purple-200 rounded-lg text-sm mt-2">
+                            <p className="text-purple-700 font-medium mb-1">How it works:</p>
+                            <ol className="text-purple-600 text-xs space-y-1 list-decimal pl-4">
+                              <li>Enter a detailed prompt describing the image you want</li>
+                              <li>Click &quot;Generate Image&quot; or &quot;Generate GIF&quot;</li>
+                              <li>AI will create a unique visual based on your prompt</li>
+                              <li>The image will be shown in the preview above</li>
+                              <li>The image will be uploaded when you share your vibe</li>
+                            </ol>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Upload Tab */}
+                      {activeImageTab === 'upload' && (
+                        <div className="space-y-4">
+                          <div className="flex gap-3">
+                            <label
+                              htmlFor="image-upload"
+                              className="cyber-button flex-1 text-center cursor-pointer"
+                            >
+                              <span className="flex items-center justify-center gap-2">
+                                <span className="text-lg">📁</span>
+                                <span>Upload Image</span>
+                              </span>
+                            </label>
+                            <input
+                              type="file"
+                              accept="image/*"
+                              id="image-upload"
+                              className="hidden"
+                              onChange={async (e) => {
+                                const file = e.target.files?.[0];
+                                if (file) {
+                                  if (file.size > 5 * 1024 * 1024) {
+                                    setError('Image must be less than 5MB');
+                                    return;
+                                  }
+
+                                  // Show loading state
+                                  setError('');
+                                  setIsCreating(true);
+                                  setPreviewImage(null);
+
+                                  try {
+                                    const formData = new FormData();
+                                    formData.append('file', file);
+
+                                    const response = await fetch('/api/upload-image', {
+                                      method: 'POST',
+                                      body: formData,
+                                    });
+
+                                    const data = await response.json();
+                                    if (!response.ok) {
+                                      throw new Error(data.error || 'Failed to upload image');
+                                    }
+
+                                    // Set as preview image instead of directly to newVibe
+                                    setPreviewImage({
+                                      url: data.imageURI,
+                                      type: 'image'
+                                    });
+                                    setError('');
+                                  } catch (error) {
+                                    console.error('Error uploading image:', error);
+                                    setError(error instanceof Error ? error.message : 'Failed to upload image. Please try again.');
+                                  } finally {
+                                    setIsCreating(false);
+                                  }
+                                }
+                              }}
+                            />
+                          </div>
+
+                          <div className="relative">
+                            <input
+                              type="url"
+                              placeholder="Or paste image URL here..."
+                              className={`cyber-input w-full p-3 text-sm pr-16 ${
+                                error && error.includes('image') ? 'border-red-500' : ''
+                              }`}
+                              value={imageUrlInput}
+                              onChange={(e) => {
+                                setError('');
+                                setImageUrlInput(e.target.value);
+                              }}
+                              onBlur={async (e) => {
+                                const url = e.target.value.trim();
+                                if (url && url.startsWith('http') && !url.startsWith('https://res.cloudinary.com/')) {
+                                  // If it's a URL but not already a Cloudinary URL, upload it to Cloudinary
+                                  setIsCreating(true);
+                                  setPreviewImage(null);
+
+                                  try {
+                                    const response = await fetch('/api/upload-image', {
+                                      method: 'POST',
+                                      headers: {
+                                        'Content-Type': 'application/json',
+                                      },
+                                      body: JSON.stringify({ url }),
+                                    });
+
+                                    const data = await response.json();
+                                    if (!response.ok) {
+                                      throw new Error(data.error || 'Failed to upload image');
+                                    }
+
+                                    // Set as preview image instead of directly to newVibe
+                                    setPreviewImage({
+                                      url: data.imageURI,
+                                      type: 'image'
+                                    });
+                                    setImageUrlInput(''); // Clear the input after successful upload
+                                  } catch (error) {
+                                    console.error('Error uploading image URL:', error);
+                                    setError(error instanceof Error ? error.message : 'Failed to upload image. Please try again.');
+                                  } finally {
+                                    setIsCreating(false);
+                                  }
+                                }
+                              }}
+                            />
+                            {isCreating && (
+                              <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                                <div className="animate-spin h-5 w-5 border-2 border-[#7928CA] border-t-transparent rounded-full"></div>
+                              </div>
+                            )}
+                          </div>
+
+                          <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm">
+                            <p className="text-blue-700 font-medium mb-1">Upload requirements:</p>
+                            <ul className="text-blue-600 text-xs space-y-1 list-disc pl-4">
+                              <li>Maximum file size: 5MB</li>
+                              <li>Supported formats: JPG, PNG, GIF, WebP</li>
+                              <li>Recommended aspect ratio: 16:9</li>
+                              <li>Images will be shown in the preview above</li>
+                              <li>Click &quot;Use this image&quot; to select it for your vibe</li>
+                            </ul>
+                          </div>
+                        </div>
+                      )}
                     </div>
 
-                    <div className="flex-grow">
-                      <input
-                        type="url"
-                        placeholder="Or paste image URL..."
-                        className={`w-full p-3 bg-white/80 backdrop-blur-sm border rounded-lg transition-colors text-sm ${
-                          error && error.includes('image') ? 'border-red-500' : 'border-purple-300 focus:border-pink-500'
-                        }`}
-                        value={newVibe.imageURI}
-                        onChange={(e) => {
-                          setError('');
-                          setNewVibe({ ...newVibe, imageURI: e.target.value });
-                        }}
-                      />
-                      <p className="mt-1 text-xs text-gray-500">
-                        Upload image (max 5MB) or provide URL
-                      </p>
-                    </div>
+                    {/* Error Message */}
+                    {error && (
+                      <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
+                        {error}
+                      </div>
+                    )}
                   </div>
 
                   <button
                     onClick={handleCreateVibe}
-                    disabled={isCreating}
+                    disabled={isCreating || !newVibe.phrase || (!previewImage && !newVibe.imageURI)}
                     className={`cyber-button-primary w-full ${isCreating ? 'opacity-50 cursor-wait' : ''}`}
                   >
                     {isCreating ? 'Creating...' : 'Share Vibe'}

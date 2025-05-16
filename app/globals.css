@@ -370,6 +370,51 @@
     transform: translateY(-2px);
   }
 
+  /* Input fields */
+  .cyber-input {
+    @apply rounded-lg;
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(5px);
+    border: 2px solid rgba(181, 55, 242, 0.2);
+    transition: all 0.3s ease;
+  }
+
+  .cyber-input:focus {
+    border-color: rgba(0, 255, 249, 0.5);
+    box-shadow: 0 0 0 2px rgba(0, 255, 249, 0.1);
+    outline: none;
+  }
+
+  .cyber-input:hover {
+    border-color: rgba(181, 55, 242, 0.4);
+  }
+
+  /* Regular button */
+  .cyber-button {
+    @apply inline-flex items-center justify-center px-4 py-2 font-medium rounded-lg;
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(5px);
+    border: 2px solid rgba(181, 55, 242, 0.2);
+    color: var(--dark-text);
+    transition: all 0.3s ease;
+  }
+
+  .cyber-button:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.8);
+    border-color: rgba(181, 55, 242, 0.4);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+  }
+
+  .cyber-button:active:not(:disabled) {
+    transform: translateY(0);
+  }
+
+  .cyber-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
   /* Preview grid */
   .vibe-preview-grid {
     display: grid;
