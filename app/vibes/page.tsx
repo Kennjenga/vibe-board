@@ -12,7 +12,6 @@ import {
   useVibeStreak,
   useHasLiked
 } from '@/blockchain/hooks/useVibeNFT';
-import { ShareButtons } from '@/components/ShareButtons';
 import { NewVibe, SAMPLE_COLORS, VibeView } from '@/types/vibe';
 import EmojiPicker from '@/components/EmojiPicker';
 
@@ -32,8 +31,12 @@ export default function Home() {
     imageURI: ''
   });
 
-  const { data: latestVibes, isLoading: loadingLatest } = useGetLatestVibes(10);
-  const { data: popularVibes, isLoading: loadingPopular } = useGetPopularVibes(10);
+  // Pagination state
+  const VIBES_PER_PAGE = 6;
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const { data: latestVibes, isLoading: loadingLatest } = useGetLatestVibes(VIBES_PER_PAGE * currentPage);
+  const { data: popularVibes, isLoading: loadingPopular } = useGetPopularVibes(VIBES_PER_PAGE * currentPage);
   const { data: userStreak } = useVibeStreak(address || '0x0');
   const { createVibe } = useCreateVibe(
     newVibe.emoji,
@@ -89,116 +92,142 @@ export default function Home() {
   };
 
   const isLoading = view === 'latest' ? loadingLatest : loadingPopular;
-  const vibes = view === 'latest' ? latestVibes : popularVibes;
+  const allVibes = view === 'latest' ? latestVibes : popularVibes;
+
+  // Calculate total pages and current page vibes
+  const totalVibes = allVibes?.length || 0;
+  const totalPages = Math.max(1, Math.ceil(totalVibes / VIBES_PER_PAGE));
+
+  // Get current page vibes
+  const startIndex = (currentPage - 1) * VIBES_PER_PAGE;
+  const endIndex = Math.min(startIndex + VIBES_PER_PAGE, totalVibes);
+  const currentVibes = allVibes?.slice(startIndex, endIndex);
+
+  // Handle page changes
+  const goToNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
+  const goToPrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
 
   return (
-    <main className="min-h-screen p-8 bg-white">
-      {/* Subtle matte gradient background */}
-      <div
-        className="absolute inset-0 w-full h-full"
-        style={{
-          background: 'linear-gradient(135deg, rgba(255, 255, 255, 1) 0%, rgba(245, 247, 255, 1) 100%)',
-          opacity: 0.9,
-          zIndex: 0
-        }}
-      />
-
-      {/* Scattered, soft circular spots of color */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {Array.from({ length: 20 }).map((_, i) => {
-          const colors = [
-            'rgba(255, 45, 189, 0.15)', // Neon Pink (muted)
-            'rgba(0, 229, 255, 0.15)',  // Neon Blue (muted)
-            'rgba(181, 55, 242, 0.15)'  // Neon Purple (muted)
-          ];
-
-          // Create larger, more spread out, softer blobs
-          const size = Math.random() * 500 + 200;
-          const animDuration = Math.random() * 60 + 40; // Slower animation
-          const delay = Math.random() * 10;
-
-          return (
-            <div
-              key={i}
-              className="absolute rounded-full"
-              style={{
-                width: `${size}px`,
-                height: `${size}px`,
-                left: `${Math.random() * 100}%`,
-                top: `${Math.random() * 100}%`,
-                opacity: Math.random() * 0.2 + 0.05, // Very subtle opacity
-                background: `radial-gradient(circle, ${colors[Math.floor(Math.random() * colors.length)]} 0%, transparent 80%)`,
-                animation: `float ${animDuration}s infinite ease-in-out`,
-                animationDelay: `${delay}s`,
-                filter: 'blur(80px)', // Extra blurry for soft edges
-                transform: 'translate3d(0, 0, 0)',
-                mixBlendMode: 'multiply', // Softer blend mode
-                zIndex: 0
-              }}
-            />
-          );
-        })}
-      </div>
-
-      <div className="max-w-7xl mx-auto relative z-10">
-        <h1 className="text-4xl font-bold mb-8 text-center cyber-text">Explore Vibes</h1>
+    <main className="min-h-screen p-4 bg-gray-50">
+      <div className="max-w-7xl mx-auto">
 
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Left Column - Vibes Feed (70%) */}
           <div className="lg:w-8/12">
-            <div className="flex gap-4 mb-6">
+            <div className="flex justify-center gap-6 mb-10">
               <button
                 onClick={() => setView('latest')}
-                className={`cyber-tab ${view === 'latest' ? 'cyber-tab-active' : ''}`}
+                className={`px-8 py-3 font-medium rounded-lg transition-all ${
+                  view === 'latest'
+                    ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg transform -translate-y-1'
+                    : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50 hover:shadow'
+                }`}
               >
-                Latest Vibes
+                <span className="flex items-center gap-2">
+                  <span className="text-lg">🔥</span>
+                  <span>Latest Vibes</span>
+                </span>
               </button>
               <button
                 onClick={() => setView('popular')}
-                className={`cyber-tab ${view === 'popular' ? 'cyber-tab-active' : ''}`}
+                className={`px-8 py-3 font-medium rounded-lg transition-all ${
+                  view === 'popular'
+                    ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg transform -translate-y-1'
+                    : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50 hover:shadow'
+                }`}
               >
-                Popular Vibes
+                <span className="flex items-center gap-2">
+                  <span className="text-lg">⭐</span>
+                  <span>Popular Vibes</span>
+                </span>
               </button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {isLoading ? (
                 Array.from({ length: 6 }).map((_, i) => (
-                  <div key={i} className="vibe-card animate-pulse">
-                    <div className="h-48 bg-gray-200 rounded-lg"></div>
+                  <div key={i} className="vibe-card animate-pulse bg-white/80 shadow-sm border border-gray-100 rounded-lg p-4">
+                    <div className="h-6 bg-gray-200 rounded w-3/4 mb-3"></div>
+                    <div className="aspect-video w-full bg-gray-200 rounded-lg mb-3"></div>
+                    <div className="flex justify-between items-center pt-2">
+                      <div className="h-8 w-20 bg-gray-200 rounded"></div>
+                      <div className="h-4 w-32 bg-gray-200 rounded"></div>
+                    </div>
                   </div>
                 ))
-              ) : vibes?.length === 0 ? (
+              ) : allVibes?.length === 0 ? (
                 <div className="col-span-full text-center py-12">
                   <p className="text-xl text-gray-500">No vibes yet. Be the first to share your vibe!</p>
                 </div>
               ) : (
-                vibes?.map((tokenId) => (
+                currentVibes?.map((tokenId) => (
                   <VibeCard key={tokenId.toString()} tokenId={tokenId} />
                 ))
               )}
             </div>
+
+            {/* Pagination Controls */}
+            {!isLoading && allVibes && allVibes.length > VIBES_PER_PAGE && (
+              <div className="flex justify-center items-center mt-8 space-x-2">
+                <button
+                  onClick={goToPrevPage}
+                  disabled={currentPage === 1}
+                  className={`px-4 py-2 rounded-lg border ${
+                    currentPage === 1
+                      ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed'
+                      : 'bg-white text-purple-600 border-purple-200 hover:bg-purple-50'
+                  }`}
+                >
+                  Previous
+                </button>
+
+                <div className="px-4 py-2 text-sm font-medium">
+                  Page {currentPage} of {totalPages}
+                </div>
+
+                <button
+                  onClick={goToNextPage}
+                  disabled={currentPage === totalPages}
+                  className={`px-4 py-2 rounded-lg border ${
+                    currentPage === totalPages
+                      ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed'
+                      : 'bg-white text-purple-600 border-purple-200 hover:bg-purple-50'
+                  }`}
+                >
+                  Next
+                </button>
+              </div>
+            )}
           </div>
 
           {/* Right Column - Create Vibe & Streak (30%) */}
           <div className="lg:w-4/12">
             {address && (
-              <div className="cyber-panel mb-6">
+              <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100 mb-6">
                 <div className="flex items-center gap-3">
-                  <div className="cyber-badge">
-                    <span className="text-lg font-bold">{userStreak?.toString() || '0'}</span>
+                  <div className="w-10 h-10 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center font-bold">
+                    {userStreak?.toString() || '0'}
                   </div>
                   <div>
-                    <h3 className="text-lg font-bold text-purple-800">Your Vibe Streak</h3>
-                    <p className="text-sm text-gray-600">Keep sharing daily!</p>
+                    <h3 className="text-lg font-medium text-gray-800">Your Vibe Streak</h3>
+                    <p className="text-sm text-gray-500">Keep sharing daily!</p>
                   </div>
                 </div>
               </div>
             )}
 
             {address && (
-              <div className="cyber-panel mb-6">
-                <h2 className="text-xl font-bold mb-4 text-pink-600">Share Your Vibe</h2>
+              <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100 mb-6">
+                <h2 className="text-xl font-medium mb-4 text-gray-800">Share Your Vibe</h2>
                 <div className="space-y-4">
                   <input
                     type="text"
@@ -214,33 +243,34 @@ export default function Home() {
                   />
                   {error && <p className="text-red-500 text-sm">{error}</p>}
 
-                  <div className="flex gap-4">
-                    <EmojiPicker
-                      selectedEmoji={newVibe.emoji}
-                      onEmojiSelect={(emoji) => setNewVibe({ ...newVibe, emoji })}
-                    />
-                    <div className="flex gap-2 flex-wrap">
-                      {SAMPLE_COLORS.map((color) => (
-                        <button
-                          key={color}
-                          onClick={() => setNewVibe({ ...newVibe, color })}
-                          className={`w-8 h-8 rounded-full transition-transform hover:scale-110 ${
-                            newVibe.color === color ? 'ring-2 ring-white ring-offset-2 ring-offset-pink-500' : ''
-                          }`}
-                          style={{ backgroundColor: color }}
-                          title={color}
-                        />
-                      ))}
-                    </div>
+                  {/* Emoji Selector */}
+                  <EmojiPicker
+                    selectedEmoji={newVibe.emoji}
+                    onEmojiSelect={(emoji) => setNewVibe({ ...newVibe, emoji })}
+                  />
+
+                  {/* Color Selector */}
+                  <div className="flex flex-wrap gap-2">
+                    {SAMPLE_COLORS.map((color) => (
+                      <button
+                        key={color}
+                        onClick={() => setNewVibe({ ...newVibe, color })}
+                        className={`w-8 h-8 rounded-full transition-transform hover:scale-110 ${
+                          newVibe.color === color ? 'ring-2 ring-white ring-offset-2 ring-offset-gray-400' : ''
+                        }`}
+                        style={{ backgroundColor: color }}
+                        title={color}
+                      />
+                    ))}
                   </div>
 
                   {/* Image Section */}
                   <div className="space-y-4">
                     {/* Image Preview */}
-                    <div className={`relative aspect-video w-full rounded-lg overflow-hidden border-2 transition-all duration-300 ${
+                    <div className={`relative aspect-video w-full rounded-lg overflow-hidden border transition-all duration-300 ${
                       previewImage?.url || newVibe.imageURI
-                        ? 'bg-gray-100 border-[#7928CA]/40 shadow-lg'
-                        : 'bg-gray-50 border-dashed border-gray-300 hover:border-[#7928CA]/30'
+                        ? 'bg-gray-100 border-gray-200 shadow-sm'
+                        : 'bg-gray-50 border-dashed border-gray-300 hover:border-gray-400'
                     }`}>
                       {previewImage?.url ? (
                         <>
@@ -349,7 +379,7 @@ export default function Home() {
                               id="image-prompt"
                               rows={2}
                               placeholder="Describe the image you want to generate..."
-                              className="cyber-input w-full p-3 text-sm"
+                              className="w-full p-3 text-sm border border-gray-300 rounded-lg focus:border-blue-500"
                               value={imagePrompt}
                               onChange={(e) => setImagePrompt(e.target.value)}
                             />
@@ -408,7 +438,7 @@ export default function Home() {
                                 }
                               }}
                               disabled={isCreating || !imagePrompt.trim()}
-                              className={`cyber-button flex-1 ${isCreating ? 'opacity-50 cursor-wait' : ''}`}
+                              className={`flex-1 py-2 px-3 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors ${isCreating ? 'opacity-50 cursor-wait' : ''}`}
                             >
                               <span className="flex items-center justify-center gap-2">
                                 <span className="text-lg">🎨</span>
@@ -457,7 +487,7 @@ export default function Home() {
                                 }
                               }}
                               disabled={isCreating || !imagePrompt.trim()}
-                              className={`cyber-button flex-1 ${isCreating ? 'opacity-50 cursor-wait' : ''}`}
+                              className={`flex-1 py-2 px-3 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors ${isCreating ? 'opacity-50 cursor-wait' : ''}`}
                             >
                               <span className="flex items-center justify-center gap-2">
                                 <span className="text-lg">✨</span>
@@ -485,7 +515,7 @@ export default function Home() {
                           <div className="flex gap-3">
                             <label
                               htmlFor="image-upload"
-                              className="cyber-button flex-1 text-center cursor-pointer"
+                              className="flex-1 py-2 px-3 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors text-center cursor-pointer"
                             >
                               <span className="flex items-center justify-center gap-2">
                                 <span className="text-lg">📁</span>
@@ -545,8 +575,8 @@ export default function Home() {
                             <input
                               type="url"
                               placeholder="Or paste image URL here..."
-                              className={`cyber-input w-full p-3 text-sm pr-16 ${
-                                error && error.includes('image') ? 'border-red-500' : ''
+                              className={`w-full p-3 text-sm pr-16 border rounded-lg ${
+                                error && error.includes('image') ? 'border-red-500' : 'border-gray-300 focus:border-blue-500'
                               }`}
                               value={imageUrlInput}
                               onChange={(e) => {
@@ -621,7 +651,11 @@ export default function Home() {
                   <button
                     onClick={handleCreateVibe}
                     disabled={isCreating || !newVibe.phrase || (!previewImage && !newVibe.imageURI)}
-                    className={`cyber-button-primary w-full ${isCreating ? 'opacity-50 cursor-wait' : ''}`}
+                    className={`w-full py-3 px-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-medium rounded-lg shadow hover:shadow-lg transition-all ${
+                      isCreating || !newVibe.phrase || (!previewImage && !newVibe.imageURI)
+                        ? 'opacity-50 cursor-not-allowed'
+                        : 'hover:from-purple-600 hover:to-pink-600'
+                    }`}
                   >
                     {isCreating ? 'Creating...' : 'Share Vibe'}
                   </button>
@@ -629,11 +663,11 @@ export default function Home() {
               </div>
             )}
 
-            <div className="cyber-panel">
-              <h2 className="text-xl font-bold mb-4 text-cyan-600">Trending Tags</h2>
+            <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
+              <h2 className="text-xl font-medium mb-4 text-gray-800">Trending Tags</h2>
               <div className="flex flex-wrap gap-2">
                 {['#cyberpunk', '#neon', '#future', '#tech', '#digital', '#vibe', '#mood'].map(tag => (
-                  <span key={tag} className="cyber-tag">{tag}</span>
+                  <span key={tag} className="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-sm hover:bg-gray-200 cursor-pointer transition-colors">{tag}</span>
                 ))}
               </div>
             </div>
@@ -653,14 +687,12 @@ function VibeCard({ tokenId }: { tokenId: bigint }) {
 
   if (isLoading) {
     return (
-      <div className="vibe-card animate-pulse backdrop-blur-sm bg-white/30 border-2 border-[#7928CA]/20 rounded-xl p-6">
-        <div className="space-y-4">
-          <div className="h-6 bg-gray-200/50 rounded w-3/4"></div>
-          <div className="aspect-video w-full bg-gray-200/50 rounded-lg"></div>
-          <div className="flex justify-between items-center">
-            <div className="h-8 w-20 bg-gray-200/50 rounded"></div>
-            <div className="h-4 w-32 bg-gray-200/50 rounded"></div>
-          </div>
+      <div className="vibe-card animate-pulse bg-white/80 shadow-sm border border-gray-100 rounded-lg p-4">
+        <div className="h-6 bg-gray-200 rounded w-3/4 mb-3"></div>
+        <div className="aspect-video w-full bg-gray-200 rounded-lg mb-3"></div>
+        <div className="flex justify-between items-center pt-2">
+          <div className="h-8 w-20 bg-gray-200 rounded"></div>
+          <div className="h-4 w-32 bg-gray-200 rounded"></div>
         </div>
       </div>
     );
@@ -681,91 +713,54 @@ function VibeCard({ tokenId }: { tokenId: bigint }) {
   };
 
   return (
-    <div className="vibe-card group backdrop-blur-sm bg-white/80 border-2 border-[var(--neon-blue)]/20 rounded-xl p-6 transition-all hover:border-[var(--neon-blue)]/40 hover:shadow-[0_0_15px_rgba(0,229,255,0.2)]">
-      {/* Card header with emoji and phrase */}
-      <div className="flex items-start gap-4 mb-4 relative">
-        <div
-          className="w-12 h-12 flex items-center justify-center rounded-xl text-2xl transition-transform group-hover:scale-110 flex-shrink-0"
-          style={{
-            backgroundColor: `${vibe.color}15`,
-            border: `2px solid ${vibe.color}30`
-          }}
-        >
-          {vibe.emoji}
-        </div>
-
-        <div className="flex-1 min-w-0">
-          <p className="text-lg font-bold truncate" style={{ color: vibe.color }}>
-            {vibe.phrase}
-          </p>
-          <p className="text-sm text-gray-600 mt-1">
+    <div className="vibe-card bg-white shadow-sm border border-gray-100 rounded-lg p-4 hover:shadow-md transition-shadow">
+      {/* Card header with phrase and creator */}
+      <div className="flex items-center justify-between mb-2">
+        <div>
+          <h3 className="text-lg font-medium text-gray-800">{vibe.phrase}</h3>
+          <p className="text-xs text-gray-500">
             by {vibe.creator.slice(0, 6)}...{vibe.creator.slice(-4)}
           </p>
         </div>
-
-        {/* Share button positioned to the right */}
-        <div className="absolute right-0 top-0 z-20">
-          <ShareButtons
-            url={`https://vibe-board.com/vibe/${tokenId.toString()}`}
-            title={`Check out this vibe by ${vibe.creator.slice(0, 6)}...${vibe.creator.slice(-4)}`}
-            text={`${vibe.emoji} ${vibe.phrase} ${vibe.emoji}`}
-          />
+        <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center">
+          <span className="text-xl">{vibe.emoji}</span>
         </div>
       </div>
 
-      {/* Vibe image or color background */}
-      <div className="aspect-video w-full rounded-lg mb-4 overflow-hidden">
+      {/* Vibe image */}
+      <div className="aspect-video w-full rounded-lg mb-3 overflow-hidden">
         {vibe.imageURI ? (
           <div className="relative w-full h-full">
             <Image
               src={vibe.imageURI}
               alt={vibe.phrase}
               fill
-              className="object-cover transition-transform group-hover:scale-105"
+              className="object-cover"
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             />
           </div>
         ) : (
           <div
-            className="w-full h-full transition-all group-hover:brightness-110"
+            className="w-full h-full"
             style={{
-              backgroundColor: vibe.color,
-              backgroundImage: `linear-gradient(135deg,
-                ${vibe.color}22 0%,
-                ${vibe.color}44 25%,
-                ${vibe.color}66 50%,
-                ${vibe.color}44 75%,
-                ${vibe.color}22 100%
-              )`
+              backgroundColor: vibe.color || '#f0f0f0'
             }}
-          >
-            <div className="w-full h-full opacity-30 mix-blend-overlay bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.8),transparent)]" />
-          </div>
+          />
         )}
       </div>
 
-      {/* Card footer with like button */}
-      <div className="flex justify-between items-center pt-3 mt-3 border-t border-[var(--neon-blue)]/10">
+      {/* Card footer with like button and date */}
+      <div className="flex justify-between items-center pt-2 border-t border-gray-100">
         <button
           onClick={handleLike}
-          className={`cyber-like-button relative overflow-hidden
-            ${hasLiked ? 'cyber-liked' : ''}
-            ${isLiking ? 'cursor-wait opacity-70' : ''}
-            px-4 py-2 text-sm font-medium rounded-xl
-            border border-[var(--neon-blue)]/30 hover:border-[var(--neon-blue)]
-            bg-gradient-to-r from-[var(--neon-blue)]/10 to-[var(--neon-purple)]/10
-            hover:from-[var(--neon-blue)]/20 hover:to-[var(--neon-purple)]/20
-            transition-all duration-300
-          `}
+          className={`flex items-center gap-1 text-gray-600 hover:text-pink-500 ${hasLiked ? 'text-pink-500' : ''}`}
           disabled={hasLiked || isLiking}
         >
-          <span className="relative z-10 flex items-center gap-2">
-            <span className="text-lg">{hasLiked ? '❤️' : isLiking ? '...' : '♡'}</span>
-            <span className="font-semibold">{vibe.likes.toString()}</span>
-          </span>
+          <span>{hasLiked ? '❤️' : isLiking ? '...' : '♡'}</span>
+          <span>{vibe.likes.toString()}</span>
         </button>
 
-        <time className="text-sm text-gray-500 font-medium">
+        <time className="text-xs text-gray-500">
           {new Date().toLocaleDateString(undefined, {
             month: 'short',
             day: 'numeric'
