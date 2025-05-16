@@ -11,40 +11,41 @@ export default function Navbar() {
   return (
     <nav className="cyber-navbar">
       <div className="px-6 py-3 flex justify-between items-center">
-        <div className="flex items-center gap-6">
-          <Link href="/" className="flex items-center gap-3">
-            <motion.div
-              className="cyber-logo"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              V
-            </motion.div>
-            <h1 className="text-2xl font-bold cyber-text hidden sm:block">
-              VIBE BOARD
-            </h1>
-          </Link>
+        {/* Logo on the left */}
+        <Link href="/" className="flex items-center gap-3">
+          <motion.div
+            className="cyber-logo"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            V
+          </motion.div>
+          <h1 className="text-2xl font-bold cyber-text hidden sm:block">
+            VIBE BOARD
+          </h1>
+        </Link>
 
-          <div className="hidden md:flex items-center gap-4">
-            <Link
-              href="/vibes"
-              className={`cyber-navbar-link ${
-                pathname === '/vibes' ? 'cyber-navbar-link-active' : ''
-              }`}
-            >
-              Explore
-            </Link>
-            <Link
-              href="/about"
-              className={`cyber-navbar-link ${
-                pathname === '/about' ? 'cyber-navbar-link-active' : ''
-              }`}
-            >
-              About
-            </Link>
-          </div>
+        {/* Navigation links centered */}
+        <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 hidden md:flex items-center gap-6">
+          <Link
+            href="/vibes"
+            className={`cyber-navbar-link ${
+              pathname === '/vibes' ? 'cyber-navbar-link-active' : ''
+            }`}
+          >
+            Explore
+          </Link>
+          <Link
+            href="/about"
+            className={`cyber-navbar-link ${
+              pathname === '/about' ? 'cyber-navbar-link-active' : ''
+            }`}
+          >
+            About
+          </Link>
         </div>
 
+        {/* Connect button on the right */}
         <ConnectButton
           label="Connect"
           accountStatus="address"

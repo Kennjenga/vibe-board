@@ -3,7 +3,7 @@ import { useState } from 'react';
 const EMOJI_CATEGORIES = {
   'Smileys & People': [
     '😊', '😎', '🥳', '🤩', '😇', '🥰', '😂', '🤣', '😍', '🤔',
-    '😴', '🤓', '😎', '🥸', '🤠', '😇', '🤡', '👻', '👾', '🤖'
+    '😴', '🤓', '🥸', '🤠', '🤡', '👻', '👾', '🤖', '😺', '🙀'
   ],
   'Animals & Nature': [
     '🦋', '🐉', '🦄', '🌸', '🌺', '🌼', '🌻', '🌹', '🍀', '🌳',
@@ -73,8 +73,8 @@ export default function EmojiPicker({ onEmojiSelect, selectedEmoji }: EmojiPicke
         </button>
       </div>      {showPicker && (
         <div className="fixed inset-0 z-[999] flex items-start justify-center pt-32">
-          <div 
-            className="fixed inset-0 bg-black/20" 
+          <div
+            className="fixed inset-0 bg-black/20"
             onClick={() => setShowPicker(false)}
           />
           <div className="relative">
@@ -86,7 +86,7 @@ export default function EmojiPicker({ onEmojiSelect, selectedEmoji }: EmojiPicke
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
-              
+
               {!searchTerm && (
                 <div className="flex gap-2 mb-3 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-purple-200">
                   {Object.keys(EMOJI_CATEGORIES).map((category) => (
@@ -104,11 +104,11 @@ export default function EmojiPicker({ onEmojiSelect, selectedEmoji }: EmojiPicke
                   ))}
                 </div>
               )}
-              
+
               <div className="grid grid-cols-8 gap-1 max-h-60 overflow-y-auto scrollbar-thin scrollbar-thumb-purple-200">
-                {filteredEmojis.map((emoji) => (
+                {filteredEmojis.map((emoji, index) => (
                   <button
-                    key={emoji}
+                    key={`${emoji}-${index}`}
                     onClick={() => {
                       onEmojiSelect(emoji);
                       setShowPicker(false);
