@@ -31,6 +31,8 @@ export default function Home() {
     imageURI: ''
   });
 
+
+
   // Pagination state
   const VIBES_PER_PAGE = 6;
   const [currentPage, setCurrentPage] = useState(1);
@@ -226,7 +228,7 @@ export default function Home() {
             )}
 
             {address && (
-              <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100 mb-6">
+              <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100 mb-6 vibes-create">
                 <h2 className="text-xl font-medium mb-4 text-gray-800">Share Your Vibe</h2>
                 <div className="space-y-4">
                   <input
@@ -244,13 +246,15 @@ export default function Home() {
                   {error && <p className="text-red-500 text-sm">{error}</p>}
 
                   {/* Emoji Selector */}
-                  <EmojiPicker
-                    selectedEmoji={newVibe.emoji}
-                    onEmojiSelect={(emoji) => setNewVibe({ ...newVibe, emoji })}
-                  />
+                  <div className="vibes-emoji-picker">
+                    <EmojiPicker
+                      selectedEmoji={newVibe.emoji}
+                      onEmojiSelect={(emoji) => setNewVibe({ ...newVibe, emoji })}
+                    />
+                  </div>
 
                   {/* Color Selector */}
-                  <div className="flex flex-wrap gap-2">
+                  <div className="flex flex-wrap gap-2 vibes-color-picker">
                     {SAMPLE_COLORS.map((color) => (
                       <button
                         key={color}
@@ -265,7 +269,7 @@ export default function Home() {
                   </div>
 
                   {/* Image Section */}
-                  <div className="space-y-4">
+                  <div className="space-y-4 vibes-image-section">
                     {/* Image Preview */}
                     <div className={`relative aspect-video w-full rounded-lg overflow-hidden border transition-all duration-300 ${
                       previewImage?.url || newVibe.imageURI
@@ -651,7 +655,7 @@ export default function Home() {
                   <button
                     onClick={handleCreateVibe}
                     disabled={isCreating || !newVibe.phrase || (!previewImage && !newVibe.imageURI)}
-                    className={`w-full py-3 px-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-medium rounded-lg shadow hover:shadow-lg transition-all ${
+                    className={`vibes-share-button w-full py-3 px-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-medium rounded-lg shadow hover:shadow-lg transition-all ${
                       isCreating || !newVibe.phrase || (!previewImage && !newVibe.imageURI)
                         ? 'opacity-50 cursor-not-allowed'
                         : 'hover:from-purple-600 hover:to-pink-600'
