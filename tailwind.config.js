@@ -17,4 +17,9 @@ module.exports = {
     },
   },
   plugins: [],
+  // Tailwind v4 options
+  preflight: true,
+  future: {
+    hoverOnlyWhenSupported: true,
+  }
 }

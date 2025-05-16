@@ -71,14 +71,14 @@ export default function EmojiPicker({ onEmojiSelect, selectedEmoji }: EmojiPicke
         >
           {showPicker ? 'Close' : 'More emojis'}
         </button>
-      </div>
-      {showPicker && (        <div className="absolute z-[100] mt-2">
+      </div>      {showPicker && (
+        <div className="fixed inset-0 z-[999] flex items-start justify-center pt-32">
           <div 
             className="fixed inset-0 bg-black/20" 
             onClick={() => setShowPicker(false)}
           />
           <div className="relative">
-            <div className="bg-white rounded-lg shadow-xl border border-purple-200 p-4 w-72 relative z-[101]">
+            <div className="bg-white rounded-lg shadow-xl border border-purple-200 p-4 w-72 relative z-[1000]">
               <input
                 type="text"
                 placeholder="Search emojis..."

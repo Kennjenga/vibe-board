@@ -9,7 +9,7 @@ export default function Navbar() {
             VIBE BOARD
           </h1>
         </div>
-        <ConnectButton />
+        <ConnectButton label="Log in" />
       </div>
     </nav>
   );
