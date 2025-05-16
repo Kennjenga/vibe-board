@@ -3,7 +3,8 @@
 import { useAccount } from 'wagmi';
 import { useState } from 'react';
 import Image from 'next/image';
-import { 
+import { ConnectButton } from '@rainbow-me/rainbowkit';
+import {
   useCreateVibe,
   useGetLatestVibes,
   useGetPopularVibes,
@@ -66,14 +67,12 @@ export default function Home() {
   const vibes = view === 'latest' ? latestVibes : popularVibes;
 
   return (
-    <main className="min-h-screen p-8 bg-gradient-to-br from-cyan-50 to-purple-50">
+    <main className="min-h-screen p-4 md:p-8 bg-gradient-to-br from-cyan-50 to-purple-50">
       <div className="max-w-7xl mx-auto">
-        {/* <h1 className="text-4xl font-bold mb-8 text-center cyber-text">CyberVibe</h1> */}
-        
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Left Column - Vibes Feed (70%) */}
-          <div className="lg:w-8/12">
-            <div className="flex gap-4 mb-6">
+          <div className="lg:w-8/12 order-2 lg:order-1">
+            <div className="flex gap-4 mb-6 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-purple-200">
               <button
                 onClick={() => setView('latest')}
                 className={`cyber-tab ${view === 'latest' ? 'cyber-tab-active' : ''}`}
@@ -88,11 +87,24 @@ export default function Home() {
               </button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
               {isLoading ? (
                 Array.from({ length: 6 }).map((_, i) => (
                   <div key={i} className="vibe-card animate-pulse">
-                    <div className="h-48 bg-gray-200 rounded-lg"></div>
+                    <div className="space-y-4">
+                      <div className="flex items-start gap-3">
+                        <div className="h-12 w-12 bg-gray-200/50 rounded-xl"></div>
+                        <div className="flex-1">
+                          <div className="h-6 bg-gray-200/50 rounded w-3/4"></div>
+                          <div className="h-4 bg-gray-200/50 rounded w-1/2 mt-2"></div>
+                        </div>
+                      </div>
+                      <div className="aspect-video w-full bg-gray-200/50 rounded-lg"></div>
+                      <div className="flex justify-between items-center pt-4 border-t border-gray-200/30">
+                        <div className="h-8 w-20 bg-gray-200/50 rounded"></div>
+                        <div className="h-4 w-32 bg-gray-200/50 rounded"></div>
+                      </div>
+                    </div>
                   </div>
                 ))
               ) : vibes?.length === 0 ? (
@@ -108,7 +120,7 @@ export default function Home() {
           </div>
 
           {/* Right Column - Create Vibe & Streak (30%) */}
-          <div className="lg:w-4/12">
+          <div className="lg:w-4/12 order-1 lg:order-2">
             {address && (
               <div className="cyber-panel mb-6">
                 <div className="flex items-center gap-3">
@@ -123,14 +135,14 @@ export default function Home() {
               </div>
             )}
 
-            {address && (
+            {address ? (
               <div className="cyber-panel mb-6">
                 <h2 className="text-xl font-bold mb-4 text-pink-600">Share Your Vibe</h2>
                 <div className="space-y-4">
                   <input
                     type="text"
                     placeholder="Enter your vibe phrase..."
-                    className={`w-full p-3 bg-white border rounded-lg transition-colors ${
+                    className={`w-full p-3 bg-white/80 backdrop-blur-sm border rounded-lg transition-colors ${
                       error ? 'border-red-500' : 'border-purple-300 focus:border-pink-500'
                     }`}
                     value={newVibe.phrase}
@@ -140,8 +152,8 @@ export default function Home() {
                     }}
                   />
                   {error && <p className="text-red-500 text-sm">{error}</p>}
-                  
-                  <div className="flex gap-4">
+
+                  <div className="flex flex-wrap gap-4">
                     <EmojiPicker
                       selectedEmoji={newVibe.emoji}
                       onEmojiSelect={(emoji) => setNewVibe({ ...newVibe, emoji })}
@@ -164,7 +176,7 @@ export default function Home() {
                   {/* Image Upload */}
                   <div className="flex gap-4 items-start">
                     <div className="flex-shrink-0">
-                      <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-gray-100 border-2 border-[#7928CA]/20">
+                      <div className="relative w-14 h-14 rounded-lg overflow-hidden bg-gray-100 border-2 border-[#7928CA]/20">
                         {newVibe.imageURI ? (
                           <>
                             <Image
@@ -183,7 +195,7 @@ export default function Home() {
                         ) : (
                           <label
                             htmlFor="image-upload"
-                            className="absolute inset-0 flex items-center justify-center cursor-pointer hover:bg-[#7928CA]/10 transition-colors"
+                            className="absolute inset-0 flex items-center justify-center cursor-pointer hover:bg-[#7928CA]/10 transition-colors text-2xl text-gray-400"
                           >
                             +
                           </label>
@@ -200,11 +212,11 @@ export default function Home() {
                                 setError('Image must be less than 5MB');
                                 return;
                               }
-                              
+
                               const formData = new FormData();
                               formData.append('file', file);
                               formData.append('upload_preset', 'vibeboard');
-                              
+
                               try {
                                 const response = await fetch(
                                   'https://api.cloudinary.com/v1_1/your-cloud-name/image/upload',
@@ -225,12 +237,12 @@ export default function Home() {
                         />
                       </div>
                     </div>
-                    
+
                     <div className="flex-grow">
                       <input
                         type="url"
                         placeholder="Or paste image URL..."
-                        className={`w-full p-3 bg-white border rounded-lg transition-colors text-sm ${
+                        className={`w-full p-3 bg-white/80 backdrop-blur-sm border rounded-lg transition-colors text-sm ${
                           error && error.includes('image') ? 'border-red-500' : 'border-purple-300 focus:border-pink-500'
                         }`}
                         value={newVibe.imageURI}
@@ -244,7 +256,7 @@ export default function Home() {
                       </p>
                     </div>
                   </div>
-                  
+
                   <button
                     onClick={handleCreateVibe}
                     disabled={isCreating}
@@ -253,6 +265,12 @@ export default function Home() {
                     {isCreating ? 'Creating...' : 'Share Vibe'}
                   </button>
                 </div>
+              </div>
+            ) : (
+              <div className="cyber-panel mb-6 text-center">
+                <h2 className="text-xl font-bold mb-4 text-pink-600">Connect to Share</h2>
+                <p className="text-gray-600 mb-4">Connect your wallet to start sharing your vibes and collecting streaks!</p>
+                <ConnectButton label="Connect Wallet" />
               </div>
             )}
 
@@ -315,12 +333,12 @@ function VibeCard({ tokenId }: { tokenId: bigint }) {
         </p>
         <span className="text-2xl transition-transform group-hover:scale-110 flex-shrink-0">{vibe.emoji}</span>
       </div>
-      
+
       <div className="aspect-video w-full rounded-lg mb-4 overflow-hidden">
         {vibe.imageURI ? (
           <div className="relative w-full h-full">
-            <Image 
-              src={vibe.imageURI} 
+            <Image
+              src={vibe.imageURI}
               alt={vibe.phrase}
               fill
               className="object-cover transition-transform group-hover:scale-105"
@@ -328,15 +346,15 @@ function VibeCard({ tokenId }: { tokenId: bigint }) {
             />
           </div>
         ) : (
-          <div 
+          <div
             className="w-full h-full transition-all group-hover:brightness-110"
-            style={{ 
+            style={{
               backgroundColor: vibe.color,
-              backgroundImage: `linear-gradient(135deg, 
-                ${vibe.color}22 0%, 
-                ${vibe.color}44 25%, 
-                ${vibe.color}66 50%, 
-                ${vibe.color}44 75%, 
+              backgroundImage: `linear-gradient(135deg,
+                ${vibe.color}22 0%,
+                ${vibe.color}44 25%,
+                ${vibe.color}66 50%,
+                ${vibe.color}44 75%,
                 ${vibe.color}22 100%
               )`
             }}
@@ -351,7 +369,7 @@ function VibeCard({ tokenId }: { tokenId: bigint }) {
           <button
             onClick={handleLike}
             className={`cyber-like-button relative overflow-hidden
-              ${hasLiked ? 'cyber-liked' : ''} 
+              ${hasLiked ? 'cyber-liked' : ''}
               ${isLiking ? 'cursor-wait opacity-70' : ''}
               px-4 py-2 text-sm font-medium rounded-md
               border border-[#7928CA]/30 hover:border-[#7928CA]
@@ -365,7 +383,7 @@ function VibeCard({ tokenId }: { tokenId: bigint }) {
               {hasLiked ? '❤️' : isLiking ? '...' : '♡'} {vibe.likes.toString()}
             </span>
           </button>
-          <ShareButtons 
+          <ShareButtons
             url={`https://vibe-board.com/vibe/${tokenId.toString()}`} // This should be configurable via environment variable
             title={`Check out this vibe by ${vibe.creator.slice(0, 6)}...${vibe.creator.slice(-4)}`}
             text={`${vibe.emoji} ${vibe.phrase} ${vibe.emoji}`}

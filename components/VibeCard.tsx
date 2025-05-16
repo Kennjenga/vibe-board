@@ -1,9 +1,12 @@
 
-import { useState } from 'react';
+"use client";
+
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { useAccount } from 'wagmi';
 import { useGetVibe, useHasLiked, useLikeVibe } from '@/blockchain/hooks/useVibeNFT';
 import { ShareButtons } from './ShareButtons';
+import { formatDistanceToNow } from 'date-fns';
 
 interface VibeCardProps {
   tokenId: bigint;
@@ -15,6 +18,15 @@ export function VibeCard({ tokenId }: VibeCardProps) {
   const { data: hasLiked } = useHasLiked(tokenId, address || '0x0');
   const { likeVibe } = useLikeVibe(tokenId);
   const [isLiking, setIsLiking] = useState(false);
+  const [timeAgo, setTimeAgo] = useState<string>('');
+
+  // Format timestamp to relative time
+  useEffect(() => {
+    if (vibe?.timestamp) {
+      const date = new Date(Number(vibe.timestamp) * 1000);
+      setTimeAgo(formatDistanceToNow(date, { addSuffix: true }));
+    }
+  }, [vibe?.timestamp]);
 
   // Add mouse movement effect for enhanced hover experience
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -22,18 +34,24 @@ export function VibeCard({ tokenId }: VibeCardProps) {
     const rect = target.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
-    
+
     target.style.setProperty("--mouse-x", `${x}px`);
     target.style.setProperty("--mouse-y", `${y}px`);
   };
 
   if (isLoading) {
     return (
-      <div className="vibe-card animate-pulse backdrop-blur-sm bg-white/30 border-2 border-[#7928CA]/20 rounded-xl p-6">
+      <div className="vibe-card animate-pulse">
         <div className="space-y-4">
-          <div className="h-6 bg-gray-200/50 rounded w-3/4"></div>
+          <div className="flex items-start gap-3">
+            <div className="h-12 w-12 bg-gray-200/50 rounded-xl"></div>
+            <div className="flex-1">
+              <div className="h-6 bg-gray-200/50 rounded w-3/4"></div>
+              <div className="h-4 bg-gray-200/50 rounded w-1/2 mt-2"></div>
+            </div>
+          </div>
           <div className="aspect-video w-full bg-gray-200/50 rounded-lg"></div>
-          <div className="flex justify-between items-center">
+          <div className="flex justify-between items-center pt-4 border-t border-gray-200/30">
             <div className="h-8 w-20 bg-gray-200/50 rounded"></div>
             <div className="h-4 w-32 bg-gray-200/50 rounded"></div>
           </div>
@@ -56,29 +74,29 @@ export function VibeCard({ tokenId }: VibeCardProps) {
     }
   };
 
-  const shareUrl = `https://vibe-board.com/vibe/${tokenId.toString()}`; 
+  const shareUrl = `https://vibe-board.com/vibe/${tokenId.toString()}`;
   const shareTitle = `Check out this vibe by ${vibe.creator.slice(0, 6)}...${vibe.creator.slice(-4)}`;
   const shareText = `${vibe.emoji} ${vibe.phrase} ${vibe.emoji}`;
   return (
-    <div 
-      className="vibe-card group backdrop-blur-sm bg-white/30 border-2 border-[#7928CA]/20 rounded-xl p-6 transition-all hover:border-[#7928CA]/40 hover:shadow-[0_0_15px_rgba(121,40,202,0.2)]" 
+    <div
+      className="vibe-card group"
       onMouseMove={handleMouseMove}
     >
       <div className="relative">
         {/* Share button positioned absolutely */}
         <div className="absolute right-0 top-0 z-10">
-          <ShareButtons 
+          <ShareButtons
             url={shareUrl}
             title={shareTitle}
             text={shareText}
           />
         </div>
-        
+
         {/* Main header content */}
         <div className="flex items-start gap-4 mb-4 pr-12">
-          <div 
+          <div
             className="w-14 h-14 flex items-center justify-center rounded-xl text-2xl transition-transform group-hover:scale-110 flex-shrink-0"
-            style={{ 
+            style={{
               backgroundColor: `${vibe.color}15`,
               border: `2px solid ${vibe.color}30`
             }}
@@ -95,12 +113,12 @@ export function VibeCard({ tokenId }: VibeCardProps) {
           </div>
         </div>
       </div>
-      
+
       <div className="aspect-video w-full rounded-lg mb-4 overflow-hidden">
         {vibe.imageURI ? (
           <div className="relative w-full h-full">
-            <Image 
-              src={vibe.imageURI} 
+            <Image
+              src={vibe.imageURI}
               alt={vibe.phrase}
               fill
               className="object-cover transition-transform group-hover:scale-105"
@@ -108,15 +126,15 @@ export function VibeCard({ tokenId }: VibeCardProps) {
             />
           </div>
         ) : (
-          <div 
+          <div
             className="w-full h-full transition-all group-hover:brightness-110"
-            style={{ 
+            style={{
               backgroundColor: vibe.color,
-              backgroundImage: `linear-gradient(135deg, 
-                ${vibe.color}22 0%, 
-                ${vibe.color}44 25%, 
-                ${vibe.color}66 50%, 
-                ${vibe.color}44 75%, 
+              backgroundImage: `linear-gradient(135deg,
+                ${vibe.color}22 0%,
+                ${vibe.color}44 25%,
+                ${vibe.color}66 50%,
+                ${vibe.color}44 75%,
                 ${vibe.color}22 100%
               )`
             }}
@@ -127,14 +145,9 @@ export function VibeCard({ tokenId }: VibeCardProps) {
       </div>      <footer className="flex justify-between items-center pt-4 mt-4 border-t border-[#7928CA]/10">
         <button
           onClick={handleLike}
-          className={`cyber-like-button relative overflow-hidden
-            ${hasLiked ? 'cyber-liked' : ''} 
+          className={`cyber-like-button
+            ${hasLiked ? 'cyber-liked' : ''}
             ${isLiking ? 'cursor-wait opacity-70' : ''}
-            px-4 py-2 text-sm font-medium rounded-xl
-            border border-[#7928CA]/30 hover:border-[#7928CA]
-            bg-gradient-to-r from-[#7928CA]/10 to-[#FF0080]/10
-            hover:from-[#7928CA]/20 hover:to-[#FF0080]/20
-            transition-all duration-300
           `}
           disabled={hasLiked || isLiking}
         >
@@ -143,12 +156,9 @@ export function VibeCard({ tokenId }: VibeCardProps) {
             <span className="font-semibold">{vibe.likes.toString()}</span>
           </span>
         </button>
-        
+
         <time className="text-sm text-gray-500 font-medium">
-          {new Date().toLocaleDateString(undefined, {
-            month: 'short',
-            day: 'numeric'
-          })}
+          {timeAgo || 'Just now'}
         </time>
       </footer>
     </div>
